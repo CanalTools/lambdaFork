@@ -158,7 +158,7 @@ abstract class Activity {
     fun SafeClientEvent.failedWith(exception: Exception) {
         val activity = this@Activity
 
-        MessageSendHelper.sendErrorMessage("Exception in $activityName: ${exception.message}")
+//        MessageSendHelper.sendErrorMessage("Exception in $activityName: ${exception.message}")
 
         if (onFailure(exception)) return
 
@@ -205,7 +205,7 @@ abstract class Activity {
         if (onFailure(childException)) return true
 
         if (this@Activity is ActivityManager) {
-            MessageSendHelper.sendErrorMessage("Traceback: ${childException.javaClass.simpleName}: ${childException.message}\n    ${childActivities.joinToString(separator = "\n    ") { it.toString() }}")
+//            MessageSendHelper.sendErrorMessage("Traceback: ${childException.javaClass.simpleName}: ${childException.message}\n    ${childActivities.joinToString(separator = "\n    ") { it.toString() }}")
             return false
         }
 

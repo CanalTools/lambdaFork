@@ -8,8 +8,11 @@ import com.lambda.client.module.modules.client.BuildTools
 import com.lambda.client.util.BaritoneUtils
 import com.lambda.client.util.items.countEmpty
 import com.lambda.client.util.items.inventorySlots
+import com.lambda.client.util.math.RotationUtils.getRotationTo
 import com.lambda.client.util.threads.safeListener
 import net.minecraft.entity.item.EntityItem
+import net.minecraft.util.MovementInputFromOptions
+import net.minecraftforge.client.event.InputUpdateEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 
 class PickUpEntityItem(
@@ -40,6 +43,11 @@ class PickUpEntityItem(
             }
 
             onFailure(InventoryFullException())
+        }
+        safeListener<InputUpdateEvent> {
+            if (it.movementInput !is MovementInputFromOptions) return@safeListener
+            player.rotationYaw = getRotationTo(entityItem.positionVector).x
+
         }
     }
 

@@ -13,9 +13,12 @@ import net.minecraft.client.gui.GuiEnchantment
 import net.minecraft.client.gui.GuiMerchant
 import net.minecraft.client.gui.GuiRepair
 import net.minecraft.client.gui.inventory.*
+import net.minecraft.enchantment.Enchantment
+import net.minecraft.enchantment.EnchantmentHelper
+import net.minecraft.init.Enchantments
 import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerShulkerBox
-import net.minecraft.item.ItemShulkerBox
+import net.minecraft.item.*
 import net.minecraftforge.fml.common.gameevent.TickEvent
 
 object ChestStealer : Module(
@@ -28,10 +31,32 @@ object ChestStealer : Module(
     private val ignoreEjectItem by setting("Ignores Eject Item", false, description = "Ignore AutoEject items in InventoryManager")
     private val delay by setting("Delay", 5, 0..20, 1, description = "Move stack delay", unit = " ticks")
     private val onlyShulkers by setting("Only Shulkers", false, description = "Only move shulker boxes")
+//    private val itemType by setting("Item Type", ItemType.ALL, description = "The type of item to move")
+
+    private val enchantment by setting("Enchantment", false, description = "Only move enchanted items")
+    private val silkTouch by setting("Silk Touch", Requirement.DOES_NOT_MATTER, { enchantment }, description = "Requirement for moving items with silk touch")
+    private val fortune by setting("Fortune", Requirement.DOES_NOT_MATTER, { enchantment }, description = "Requirement for moving items with fortune")
+    private val mending by setting("Mending", Requirement.DOES_NOT_MATTER, { enchantment }, description = "Requirement for moving items with mending")
+    private val unbreaking by setting("Unbreaking", Requirement.DOES_NOT_MATTER, { enchantment }, description = "Requirement for moving items with unbreaking")
+
+    private val toolRequirement by setting("Tool", Requirement.DOES_NOT_MATTER, description = "Only move tools")
+    private val toolType by setting("Tool Type", ToolType.PICKAXE, { toolRequirement != Requirement.DOES_NOT_MATTER }, description = "The type of tool to move")
 
     enum class Mode {
         ALWAYS, TOGGLE, MANUAL
     }
+
+    enum class Requirement {
+        REQUIRE, REJECT, DOES_NOT_MATTER
+    }
+
+    enum class ToolType {
+        PICKAXE, SHOVEL, AXE, ELYTRA
+    }
+
+//    enum class ItemType {
+//        ALL, SILK_PICK, FORTUNE_PICK, SHOVEL
+//    }
 
     private enum class MovingMode {
         QUICK_MOVE, PICKUP, THROW
@@ -137,6 +162,8 @@ object ChestStealer : Module(
         for (slot in 0 until getContainerSlotSize()) {
             val item = container[slot].item
             if (item == Items.AIR) continue
+            if (!hasValidEnchantments(container[slot])) continue
+            if (!meetsToolRequirements(container[slot])) continue
             if (ignoreEjectItem && InventoryManager.ejectList.contains(item.registryName.toString())) continue
             if (!onlyShulkers || item is ItemShulkerBox) {
                 return slot
@@ -153,6 +180,8 @@ object ChestStealer : Module(
         for (slot in size until size + 36) {
             val item = container[slot].item
             if (item == Items.AIR) continue
+            if (!hasValidEnchantments(container[slot])) continue
+            if (!meetsToolRequirements(container[slot])) continue
             if (player.openContainer is ContainerShulkerBox && item is ItemShulkerBox) continue
             if (!onlyShulkers || item is ItemShulkerBox) {
                 return slot
@@ -160,6 +189,42 @@ object ChestStealer : Module(
         }
 
         return null
+    }
+
+    private fun hasValidEnchantments(stack: ItemStack): Boolean {
+        if (!enchantment) return true
+        if (!isEnchantmentCorrect(silkTouch, Enchantments.SILK_TOUCH, stack)) return false
+        if (!isEnchantmentCorrect(fortune, Enchantments.FORTUNE, stack)) return false
+        if (!isEnchantmentCorrect(unbreaking, Enchantments.UNBREAKING, stack)) return false
+        if (!isEnchantmentCorrect(mending, Enchantments.MENDING, stack)) return false
+        return true
+    }
+
+    private fun isEnchantmentCorrect(requirement: Requirement, enchantment: Enchantment, stack: ItemStack): Boolean {
+        if (requirement == Requirement.REQUIRE && EnchantmentHelper.getEnchantmentLevel(enchantment, stack) == 0) return false
+        if (requirement == Requirement.REJECT && EnchantmentHelper.getEnchantmentLevel(enchantment, stack) > 0) return false
+        return true
+    }
+
+    private fun meetsToolRequirements(stack: ItemStack): Boolean {
+        if (toolRequirement == Requirement.DOES_NOT_MATTER) return true
+
+        val isSelectedToolType = toolType == ToolType.PICKAXE && stack.item is ItemPickaxe
+            || toolType == ToolType.SHOVEL && stack.item is ItemSpade
+            || toolType == ToolType.AXE && stack.item is ItemAxe
+            || toolType == ToolType.ELYTRA && stack.item is ItemElytra
+
+        if (toolRequirement == Requirement.REQUIRE) {
+            if (isSelectedToolType) return true
+            return false
+        }
+
+        if (toolRequirement == Requirement.REJECT && isSelectedToolType) {
+            return false
+        }
+
+        return true
+
     }
 
     private fun SafeClientEvent.getContainerSlotSize(): Int {

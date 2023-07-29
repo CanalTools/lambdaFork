@@ -195,7 +195,7 @@ class BreakBlock(
     }
 
     private fun SafeClientEvent.updateState() {
-        if (checkLiquids()) return
+//        if (checkLiquids()) return
 
         updateProperties()
 
@@ -203,13 +203,13 @@ class BreakBlock(
             val hitVec = getHitVec(blockPos, it)
 
             /* prevent breaking the block the player is standing on */
-            if (player.flooredPosition.down() == blockPos
-                && !world.getBlockState(blockPos.down()).isSideSolid(world, blockPos.down(), EnumFacing.UP)
-            ) {
-                availability = BuildActivity.Availability.BLOCKED_BY_PLAYER
-                distance = player.distanceTo(hitVec)
-                return
-            }
+//            if (player.flooredPosition.down() == blockPos
+//                && !world.getBlockState(blockPos.down()).isSideSolid(world, blockPos.down(), EnumFacing.UP)
+//            ) {
+//                availability = BuildActivity.Availability.BLOCKED_BY_PLAYER
+//                distance = player.distanceTo(hitVec)
+//                return
+//            }
             availability = BuildActivity.Availability.VALID
             distance = player.distanceTo(hitVec)
             side = it
@@ -286,7 +286,7 @@ class BreakBlock(
 
         val currentDestroySpeed = player.heldItemMainhand.getDestroySpeed(currentState)
 
-        player.inventorySlots.maxByOrNull { it.stack.getDestroySpeed(currentState) }?.let {
+        player.inventorySlots.reversed().maxByOrNull { it.stack.getDestroySpeed(currentState) }?.let {
             if (it.stack.getDestroySpeed(currentState) > currentDestroySpeed
 //                && it.stack != player.heldItemMainhand
 //                && (!getSilkDrop || EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, it.stack) > 0)

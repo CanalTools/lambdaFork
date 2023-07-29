@@ -71,7 +71,7 @@ object ActivityManager : Manager, Activity() {
 
             var lastActivity: Activity? = null
 
-            BaritoneUtils.settings?.allowInventory?.value = false
+//            BaritoneUtils.settings?.allowInventory?.value = false
 
             repeat(executionCountPerTick) {
                 val current = getCurrentActivity()
@@ -109,27 +109,27 @@ object ActivityManager : Manager, Activity() {
         listener<RenderOverlayEvent> {
             if (hasNoSubActivities) return@listener
 
-            GlStateUtils.rescaleActual()
-
-            RenderOverlayTextActivity.normalizedRender.forEach { renderText ->
-                GL11.glPushMatrix()
-                val screenPos = ProjectionUtils.toScreenPos(renderText.origin)
-                GL11.glTranslated(screenPos.x, screenPos.y, 0.0)
-                GL11.glScalef(textScale * 2.0f, textScale * 2.0f, 1.0f)
-
-                val halfWidth = FontRenderAdapter.getStringWidth(renderText.text) / -2.0f
-                val lineHeight = FontRenderAdapter.getFontHeight() + 2.0f
-                val yLift = lineHeight * 3 / 2
-
-                FontRenderAdapter.drawString(
-                    renderText.text,
-                    halfWidth,
-                    lineHeight * renderText.index - yLift,
-                    color = renderText.color
-                )
-
-                GL11.glPopMatrix()
-            }
+//            GlStateUtils.rescaleActual()
+//
+//            RenderOverlayTextActivity.normalizedRender.forEach { renderText ->
+//                GL11.glPushMatrix()
+//                val screenPos = ProjectionUtils.toScreenPos(renderText.origin)
+//                GL11.glTranslated(screenPos.x, screenPos.y, 0.0)
+//                GL11.glScalef(textScale * 2.0f, textScale * 2.0f, 1.0f)
+//
+//                val halfWidth = FontRenderAdapter.getStringWidth(renderText.text) / -2.0f
+//                val lineHeight = FontRenderAdapter.getFontHeight() + 2.0f
+//                val yLift = lineHeight * 3 / 2
+//
+//                FontRenderAdapter.drawString(
+//                    renderText.text,
+//                    halfWidth,
+//                    lineHeight * renderText.index - yLift,
+//                    color = renderText.color
+//                )
+//
+//                GL11.glPopMatrix()
+//            }
             GlStateUtils.rescaleMc()
         }
     }

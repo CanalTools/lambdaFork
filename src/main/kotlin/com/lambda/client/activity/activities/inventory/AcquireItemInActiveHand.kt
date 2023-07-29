@@ -60,30 +60,30 @@ class AcquireItemInActiveHand(
             return
         }
 
-        if (useShulkerBoxes && order.item !is ItemShulkerBox) {
-            val candidates = mutableMapOf<Slot, Int>()
+//        if (useShulkerBoxes && order.item !is ItemShulkerBox) {
+//            val candidates = mutableMapOf<Slot, Int>()
+//
+//            player.allSlots.forEach { slot ->
+//                getShulkerInventory(slot.stack)?.let { inventory ->
+//                    val count = inventory.count {
+//                        order.item == it.item
+//                            && order.predicateStack(it)
+//                            && (order.metadata == null || order.metadata == it.metadata)
+//                    }
+//
+//                    if (count > 0) candidates[slot] = count
+//                }
+//            }
+//
+//            candidates.minByOrNull { it.value }?.key?.let { slot ->
+//                addSubActivities(ExtractItemFromShulkerBox(
+//                    slot.stack, order
+//                ))
+//                return
+//            }
+//        }
 
-            player.allSlots.forEach { slot ->
-                getShulkerInventory(slot.stack)?.let { inventory ->
-                    val count = inventory.count {
-                        order.item == it.item
-                            && order.predicateStack(it)
-                            && (order.metadata == null || order.metadata == it.metadata)
-                    }
-
-                    if (count > 0) candidates[slot] = count
-                }
-            }
-
-            candidates.minByOrNull { it.value }?.key?.let { slot ->
-                addSubActivities(ExtractItemFromShulkerBox(
-                    slot.stack, order
-                ))
-                return
-            }
-        }
-
-        if (order.item == Blocks.OBSIDIAN.item) {
+        if (order.item == Blocks.OBSIDIAN.item && BuildTools.breakDownEnderChests) {
             addSubActivities(BreakDownEnderChests(maximumRepeats = BuildTools.breakDownCycles))
             return
         }
